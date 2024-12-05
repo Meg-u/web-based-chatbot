@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Chat</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --background: #1f2937;
+            --surface: #374151;
+            --surface-light: #4b5563;
+            --text: #f3f4f6;
+            --text-light: #9ca3af;
+            --error: #ef4444;
+            --success: #10b981;
+            
+            --font-primary: system-ui, -apple-system, sans-serif;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-md);
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--surface);
+            padding: var(--spacing-xl);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        h2 {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+            color: var(--text);
+        }
+
+        .input-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: var(--background);
+            border: 1px solid var(--surface-light);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: var(--font-size-base);
+            transition: var(--transition);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-light);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: var(--spacing-md);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: var(--font-size-base);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .switch-form {
+            text-align: center;
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+        }
+
+        .switch-form a {
+            color: var(--primary-light);
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .switch-form a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: var(--error);
+            color: white;
+            padding: var(--spacing-md);
+            border-radius: 0.5rem;
+            margin-bottom: var(--spacing-md);
+            font-size: var(--font-size-sm);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: var(--spacing-lg) 0;
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--surface-light);
+            margin: 0 var(--spacing-sm);
+        }
+
+        .oauth-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .oauth-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+            background: var(--surface-light);
+            border: 1px solid var(--surface-light);
+            border-radius: 0.5rem;
+            color: var(--text);
+            font-size: var(--font-size-base);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .oauth-button:hover {
+            transform: translateY(-2px);
+            background: var(--surface);
+            border-color: var(--primary-light);
+        }
+
+        .oauth-button:active {
+            transform: translateY(0);
+        }
+
+        .oauth-button i {
+            font-size: var(--font-size-lg);
+        }
+
+        .google-btn {
+            background: #ffffff;
+            color: #333333;
+        }
+
+        .google-btn i {
+            color: #ea4335;
+        }
+
+        .facebook-btn {
+            background: #05695a;
+        }
+
+        .facebook-btn i {
+            color: #ffffff;
+        }
+
+        .github-btn {
+            background: #24292e;
+        }
+
+        .github-btn i {
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--spacing-lg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Error Message Container -->
+        <div id="error-message" class="error-message"></div>
+
+        <!-- Sign Up Form -->
+        <div id="signUpContainer" class="form-container active">
+            <h2>Sign Up</h2>
+            <form id="signup-form" method="POST">
+                <div class="input-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" name="email" required>
+                </div>
+                <div class="input-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" required>
+                </div>
+                <div class="input-group">
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <button type="submit" class="submit-btn">Sign Up</button>
+            </form>
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
+            <div class="oauth-container">
+                <button class="oauth-button google-btn" onclick="alert('Google OAuth coming soon!')">
+                    <i class="fab fa-google"></i>
+                    Continue with Google
+                </button>
+                <button class="oauth-button facebook-btn" onclick="alert('Facebook OAuth coming soon!')">
+                    <i class="fab fa-facebook"></i>
+                    Continue with Facebook
+                </button>
+                <button class="oauth-button github-btn" onclick="window.location.href='/login/github'">
+                    <i class="fab fa-github"></i>
+                    Continue with GitHub
+                </button>
+            </div>
+            <p class="switch-form">
+                Already have an account? <a href="#" id="showLogin">Login</a>
+            </p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginContainer" class="form-container">
+            <h2>Login</h2>
+            <form id="login-form" method="POST">
+                <div class="input-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" name="email" required>
+                </div>
+                <div class="input-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" required>
+                </div>
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+            <div class="divider">
+                <span>or continue with</span>
+            </div>
+            <div class="oauth-container">
+                <button class="oauth-button google-btn" onclick="alert('Google OAuth coming soon!')">
+                    <i class="fab fa-google"></i>
+                    Continue with Google
+                </button>
+                <button class="oauth-button facebook-btn" onclick="alert('Facebook OAuth coming soon!')">
+                    <i class="fab fa-facebook"></i>
+                    Continue with Facebook
+                </button>
+                <button class="oauth-button github-btn" onclick="window.location.href='/login/github'">
+                    <i class="fab fa-github"></i>
+                    Continue with GitHub
+                </button>
+            </div>
+            <p class="switch-form">
+                Don't have an account? <a href="#" id="showSignUp">Sign Up</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    <script>
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                } else {
+                    throw new Error(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        async function signup() {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            try {
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
+                } else {
+                    throw new Error(data.error || 'Signup failed');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorMessage.textContent = error.message;
+                errorMessage.style.display = 'block';
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/check-auth');
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    window.location.href = '/chat';
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const showLoginBtn = document.getElementById('showLogin');
+            const showSignupBtn = document.getElementById('showSignUp');
+            
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    login();
+                });
+            }
+            
+            if (signupForm) {
+                signupForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    signup();
+                });
+            }
+            
+            if (showLoginBtn) {
+                showLoginBtn.addEventListener('click', function() {
+                    document.getElementById('signUpContainer').classList.remove('active');
+                    document.getElementById('loginContainer').classList.add('active');
+                });
+            }
+            
+            if (showSignupBtn) {
+                showSignupBtn.addEventListener('click', function() {
+                    document.getElementById('loginContainer').classList.remove('active');
+                    document.getElementById('signUpContainer').classList.add('active');
+                });
+            }
+
+            // Check auth status on page load
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

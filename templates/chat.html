@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --background: #1f2937;
+            --surface: #374151;
+            --surface-light: #4b5563;
+            --text: #f3f4f6;
+            --text-light: #9ca3af;
+            --error: #ef4444;
+            --success: #10b981;
+            
+            --font-primary: system-ui, -apple-system, sans-serif;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            
+            --transition: all 0.3s ease;
+            --sidebar-width: 300px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+            height: 100vh;
+            display: flex;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-md);
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--surface-light);
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .new-chat-btn, .clear-chat-btn, .logout-btn {
+            background-color: var(--primary);
+            color: var(--text);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: var(--font-size-sm);
+            transition: var(--transition);
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .clear-chat-btn {
+            background-color: var(--error);
+        }
+
+        .new-chat-btn:hover {
+            background-color: var(--primary-light);
+        }
+
+        .clear-chat-btn:hover {
+            background-color: white;
+        }
+
+        .logout-btn {
+            background-color: var(--surface-light);
+        }
+
+        .logout-btn:hover {
+            background-color: var(--error);
+        }
+
+        .new-chat-btn i, .clear-chat-btn i {
+            font-size: var(--font-size-base);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+        }
+
+        .message {
+            max-width: 80%;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: 1.5rem;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .message.bot-message {
+            background: var(--surface);
+            border: 1px solid var(--text-light);
+            align-self: flex-start;
+            border-bottom-left-radius: 0.5rem;
+        }
+
+        .message-text {
+            font-size: var(--font-size-base);
+        }
+
+        .message-time {
+            font-size: var(--font-size-sm);
+            color: var(--text-light);
+            margin-top: var(--spacing-xs);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            background: var(--surface);
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        #message-input {
+            flex: 1;
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: none;
+            border-radius: 0.5rem;
+            background: var(--background);
+            color: var(--text);
+            font-size: var(--font-size-base);
+            transition: var(--transition);
+            resize: none;
+        }
+
+        #message-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        #send-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: var(--spacing-md) var(--spacing-xl);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        #send-button:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        #send-button:active {
+            transform: translateY(0);
+        }
+
+        #send-button i {
+            font-size: var(--font-size-lg);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background);
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-header {
+                flex-direction: column;
+                gap: 10px;
+                padding: var(--spacing-sm);
+            }
+
+            .header-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .new-chat-btn, .clear-chat-btn, .logout-btn {
+                padding: 6px 12px;
+                font-size: calc(var(--font-size-sm) - 1px);
+            }
+
+            h1 {
+                font-size: var(--font-size-lg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .new-chat-btn, .clear-chat-btn, .logout-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body class="chat-page">
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>My AI Companion</h1>
+            <div class="header-buttons">
+                <button id="new-chat-button" class="new-chat-btn">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+                <button id="clear-chat-button" class="clear-chat-btn">
+                    <i class="fas fa-trash"></i> Clear Chat
+                </button>
+                <button id="logout-button" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+        
+        <div id="chat-messages" class="chat-messages">
+            <!-- Messages will be added here dynamically -->
+            <div class="message bot-message">
+                <div class="message-text">Hello! I'm your AI assistant. How can I help you today?</div>
+                <div class="message-time">{{ current_time }}</div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <textarea 
+                id="message-input" 
+                placeholder="Type your message here..." 
+                rows="1"
+                autofocus
+            ></textarea>
+            <button id="send-button" class="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        console.log('Debug: chat.html loaded');
+        window.addEventListener('load', function() {
+            console.log('Debug: window loaded');
+            // Check if elements exist
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const chatMessages = document.getElementById('chat-messages');
+            
+            console.log('Debug: message-input exists:', !!messageInput);
+            console.log('Debug: send-button exists:', !!sendButton);
+            console.log('Debug: chat-messages exists:', !!chatMessages);
+            
+            // Add temporary click handler
+            if (sendButton) {
+                sendButton.addEventListener('click', function() {
+                    console.log('Debug: send button clicked directly from chat.html');
+                });
+            }
+        });
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/chat.js') }}" defer></script>
+</body>
+</html>
